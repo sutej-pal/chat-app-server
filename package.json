@@ -1,0 +1,25 @@
+{
+  "name": "chat-app-server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "start_dev": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "mongoose": "^5.9.6",
+    "morgan": "~1.9.1",
+    "nodemon": "^2.0.2",
+    "validatorjs": "^3.18.1"
+  },
+  "devDependencies": {
+    "bcrypt": "^4.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "socket.io": "^2.3.0"
+  }
+}
