@@ -3,11 +3,14 @@ const User = require('../models/user');
 
 module.exports = class UserController {
     static async getAll(req, res) {
+        let activeUser = req.user;
         try {
             let users = [];
             let response = await User.find();
             response.forEach(user => {
-                users.push(user.toObject());
+                if (user.name !== activeUser.name) {
+                    users.push(user.toObject());
+                }
             });
             return Helper.main.response200(res, users, 'user-list')
         } catch (err) {

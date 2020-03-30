@@ -9,6 +9,13 @@ const JWT = require("jsonwebtoken");
 
 const Bcrypt = require("bcrypt");
 
+class UserAuthFormat {
+    constructor(user) {
+        this.name = user.name,
+        this.email = user.email
+    }
+}
+
 module.exports = class AuthController {
     static signUp(req, res) {
         const validator = new RegisterValidator(req);
@@ -42,7 +49,7 @@ module.exports = class AuthController {
                             // TODO: Send user verification email
                             return res.json({
                                 message: "Registration Successful!",
-                                data: user
+                                data: new UserAuthFormat(user)
                             });
                         })
                         .catch(e => {

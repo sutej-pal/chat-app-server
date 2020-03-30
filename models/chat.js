@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const chatSchema = new mongoose.Schema(
     {
+        roomId: {
+            type: mongoose.Types.ObjectId,
+            ref: 'ChatRoom'
+        },
         message: {
             type: String,
             required: false
@@ -10,10 +14,12 @@ const chatSchema = new mongoose.Schema(
             required: false
         },
         senderId: {
-            required: true
+            type: mongoose.Types.ObjectId,
+            ref: 'User'
         },
         receiverId: {
-            required: true
+            type: mongoose.Types.ObjectId,
+            ref: 'User'
         },
         seen: {
             type: Boolean
