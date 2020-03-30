@@ -21,14 +21,10 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-const io = require('socket.io')(server);
-io.on('connection', function(socket) {
-  console.log(socket.id);
-  socket.on('SEND_MESSAGE', data => {
-    console.log('MESSAGE', data);
-    io.emit('MESSAGE', data)
-  });
-});
+/**
+ * Initialise Socket
+ */
+require('../engine/socket')(server);
 
 /**
  * Listen on provided port, on all network interfaces.
