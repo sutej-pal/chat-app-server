@@ -37,12 +37,6 @@ module.exports = class AuthController {
                             errors: {email: ["Email already in use!"]}
                         });
                     }
-                    if (user.username === validated.username) {
-                        return res.status(422).json({
-                            message: "Username already taken!",
-                            errors: {username: ["Username already taken!"]}
-                        });
-                    }
                 } else {
                     User.create(validated)
                         .then(user => {
@@ -75,9 +69,7 @@ module.exports = class AuthController {
 
         const validated = validator.validated;
 
-        User.findOne({
-            $or: [{email: validated.email}, {username: validated.username}]
-        })
+        User.findOne({email: validated.email})
             .then(user => {
                 if (!user) {
                     return res.status(422).json({
@@ -123,4 +115,4 @@ module.exports = class AuthController {
                 res.status(500).json({message: "Some error occured!"});
             });
     }
-}
+};

@@ -7,7 +7,7 @@ module.exports = class LoginValidator extends Validator {
    * Rules
    */
   rules = {
-    name: 'required:email',
+    email: 'required|email',
     password: 'required|string',
   };
 }
