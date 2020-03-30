@@ -2,6 +2,7 @@ const LoginValidator = require("../validators/app/login_validator");
 const RegisterValidator = require("../validators/register_validator");
 
 const User = require("../models/user");
+const ApiToken = require("../models/apitoken");
 const LoginLog = require("../models/login_log");
 
 const JWT = require("jsonwebtoken");
@@ -71,7 +72,6 @@ module.exports = class AuthController {
             $or: [{email: validated.email}, {username: validated.username}]
         })
             .then(user => {
-
                 if (!user) {
                     return res.status(422).json({
                         message: "User not found!",
@@ -79,41 +79,37 @@ module.exports = class AuthController {
                     });
                 } else {
                     if (!user.compareHash(validated.password)) {
-                        return res.json({
-                            message: "Login Successful!",
-                            data: user
+
+                        LoginLog.create({user: user.id, ipAddress: ipAddress, status: 0});
+
+                        return res.status(422).json({
+                            message: "Password incorrect!",
+                            errors: {password: ["Password incorrect!"]}
                         });
                     }
-                    //
-                    //     LoginLog.create({user: user.id, ipAddress: ipAddress, status: 0});
-                    //
-                    //     return res.status(422).json({
-                    //         message: "Password incorrect!",
-                    //         errors: {password: ["Password incorrect!"]}
-                    //     });
-                    // }
-                    // JWT.sign(user.toObject(), process.env.APP_KEY, {expiresIn: "365 days"}, function (err, token) {
-                    //         if (err) {
-                    //             throw err;
-                    //         }
-                    //         ApiToken.create({email: user.email, token: token})
-                    //             .then(apiToken => {
-                    //                 // TODO: Send login alert
-                    //                 // TODO: Track user ip
-                    //
-                    //                 LoginLog.create({user: user.id, ipAddress: ipAddress, status: 1});
-                    //
-                    //                 return res.json({
-                    //                     message: "Login Successful!",
-                    //                     data: Object.assign(apiToken.toObject(), user.toObject())
-                    //                 });
-                    //             })
-                    //             .catch(err => {
-                    //                 throw err;
-                    //             });
-                    //     }
-                    // );
+                    JWT.sign(user.toObject(), process.env.APP_KEY, {expiresIn: "365 days"}, function (err, token) {
+                            if (err) {
+                                throw err;
+                            }
+                            ApiToken.create({email: user.email, token: token})
+                                .then(apiToken => {
+                                    // TODO: Send login alert
+                                    // TODO: Track user ip
+
+                                    LoginLog.create({user: user.id, ipAddress: ipAddress, status: 1});
+
+                                    return res.json({
+                                        message: "Login Successful!",
+                                        data: Object.assign(apiToken.toObject(), user.toObject())
+                                    });
+                                })
+                                .catch(err => {
+                                    throw err;
+                                });
+                        }
+                    );
                 }
+
             })
             .catch(e => {
                 console.log(e);
