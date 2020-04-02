@@ -4,10 +4,9 @@ const RegisterValidator = require("../validators/register_validator");
 const User = require("../models/user");
 const ApiToken = require("../models/apitoken");
 const LoginLog = require("../models/login_log");
+const transporter = require('../config/mail');
 
 const JWT = require("jsonwebtoken");
-
-const Bcrypt = require("bcrypt");
 
 class UserAuthFormat {
     constructor(user) {
@@ -114,5 +113,15 @@ module.exports = class AuthController {
                 console.log(e);
                 res.status(500).json({message: "Some error occured!"});
             });
+    }
+    async sendAuthMail () {
+        let info = await transporter.sendMail({
+            from: '"Fred Foo 👻" <foo@example.com>', // sender address
+            to: "bar@example.com, baz@example.com", // list of receivers
+            subject: "Hello ✔", // Subject line
+            text: "Hello world?", // plain text body
+            html: "<b>Hello world?</b>" // html body
+        });
+        console.log('mail info', info)
     }
 };

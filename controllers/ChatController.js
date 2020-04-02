@@ -16,10 +16,14 @@ module.exports = class ChatController {
 
         ChatRoom.find({participants: { $all : object.participants}}).lean().then( res => {
             if (res.length === 1) {
-                ChatController.chat(res[0]._id, data)
+                ChatController.chat(res[0]._id, data).then(() => {
+                    return 'chatSaved'
+                });
             } else {
                 ChatRoom.create(object).then(res => {
-                    ChatController.chat(res._id, data)
+                    ChatController.chat(res._id, data).then(() => {
+                        return 'chatSaved'
+                    })
                 })
             }
         })
