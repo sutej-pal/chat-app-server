@@ -1,5 +1,6 @@
 const Chat = require('../models/chat');
 const ChatRoom = require('../models/chat_room');
+const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 
 const Helper = require('../config/helper');
@@ -14,7 +15,7 @@ module.exports = class ChatController {
             ]
         };
 
-        ChatRoom.find({participants: { $all : object.participants}}).lean().then( res => {
+        ChatRoom.find({participants: {$all: object.participants}}).lean().then(res => {
             if (res.length === 1) {
                 ChatController.chat(res[0]._id, data).then(() => {
                     return 'chatSaved'
@@ -56,7 +57,7 @@ module.exports = class ChatController {
         let senderId = mongoose.Types.ObjectId(req.body.senderId);
         let receiverId = mongoose.Types.ObjectId(req.body.receiverId);
 
-        ChatRoom.find({participants: { $all : [senderId, receiverId]}}).lean()
+        ChatRoom.find({participants: {$all: [senderId, receiverId]}}).lean()
             .then(res => {
                 if (res.length === 1) {
                     Chat.find({roomId: res[0]._id}).lean()
@@ -68,5 +69,66 @@ module.exports = class ChatController {
                 }
 
             })
+    }
+
+    static async storeMessages(data) {
+        let object = {
+            participants: [
+                mongoose.Types.ObjectId(data.senderId),
+                mongoose.Types.ObjectId(data.receiverId)
+            ],
+            messages: {
+                message: data.message,
+                senderId: mongoose.Types.ObjectId(data.senderId),
+                receiverId: mongoose.Types.ObjectId(data.receiverId)
+            }
+        };
+        ChatRoom1.find({
+            participants: {
+                $all:
+                    [
+                        mongoose.Types.ObjectId(data.senderId),
+                        mongoose.Types.ObjectId(data.receiverId)
+                    ]
+            }
+        }).lean().then(chatRoom => {
+            console.log('chatRoom', chatRoom);
+            if (chatRoom.length === 0) {
+                ChatRoom1.create(object).then(newChatRoom => {
+                    console.log('newChatRoom', newChatRoom);
+                })
+            } else {
+                ChatRoom1.findOneAndUpdate(
+                    {
+                        participants: {
+                            $all:
+                                [
+                                    mongoose.Types.ObjectId(data.senderId),
+                                    mongoose.Types.ObjectId(data.receiverId)
+                                ]
+                        }
+                    },
+                    {
+                        $push: {messages: object.messages}
+                    }, {new: true}).then(updatedChatRoom => {
+                    console.log('updatedChatRoom', updatedChatRoom);
+                })
+            }
+        });
+    }
+
+    static async chatHistory(req, res) {
+        let response = await ChatRoom1.find(
+            {
+                participants: {
+                    $all:
+                        [
+                            mongoose.Types.ObjectId(req.body.senderId),
+                            mongoose.Types.ObjectId(req.body.receiverId)
+                        ]
+                }
+            });
+        return Helper.main.response200(res, response[0].messages, 'chat history');
+
     }
 };

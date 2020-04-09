@@ -5,7 +5,7 @@ module.exports = function (server) {
     io.on('connection', function (socket) {
         console.log(socket.id);
         socket.on('SEND_MESSAGE', data => {
-            ChatController.saveChat(data).then(() => {
+            ChatController.storeMessages(data).then(() => {
                 io.emit('MESSAGE', data)
             })
         });
