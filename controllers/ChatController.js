@@ -118,7 +118,7 @@ module.exports = class ChatController {
     }
 
     static async chatHistory(req, res) {
-        let response = await ChatRoom1.find(
+        let chatRoom = await ChatRoom1.find(
             {
                 participants: {
                     $all:
@@ -128,7 +128,11 @@ module.exports = class ChatController {
                         ]
                 }
             });
-        return Helper.main.response200(res, response[0].messages, 'chat history');
+        if (chatRoom.length > 0 && chatRoom[0].messages) {
+            return Helper.main.response200(res, chatRoom[0].messages, 'chat history');
+        } else {
+            return Helper.main.response200(res, [], 'chat history');
+        }
 
     }
 };
