@@ -27,6 +27,10 @@ const messageSchema = new mongoose.Schema(
 
 const chatRoomSchema1 = new mongoose.Schema(
     {
+        isGroup: {
+            type: Boolean,
+            default: false
+        },
         participants: [
             {
                 type: mongoose.Types.ObjectId,
@@ -36,7 +40,15 @@ const chatRoomSchema1 = new mongoose.Schema(
         messages: [messageSchema]
     },
     {
-        timestamps: true
+        timestamps: true,
+        toObject:{
+            transform: (object, transformed) => {
+                delete object.__v;
+                transformed.id = object._id;
+                delete object._id;
+                return transformed
+            }
+        }
     }
 );
 
