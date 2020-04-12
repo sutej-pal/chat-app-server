@@ -9,7 +9,7 @@ const ChatController = require('../controllers/ChatController');
 
 router.post('/sign-up', AuthController.signUp);
 router.post('/login', AuthController.login);
-router.get('/users-list', AuthMiddleware, UserController.getAll);
+router.get('/all-users', AuthMiddleware, UserController.getAll);
 router.post('/save-chat', ChatController.storeMessages);
 router.post('/chat-history-1', ChatController.chatHistory);
 router.get('/recent-users', AuthMiddleware, UserController.recentlyContactedUsers);
