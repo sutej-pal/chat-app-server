@@ -7,11 +7,11 @@ const userSchema = new mongoose.Schema(
         username: String,
         email: String,
         password: String,
-        dob: Date,
         profileImage: String,
         coverImage: String,
         bio: String,
-        isActive: Boolean
+        isActive: Boolean,
+        lastContacted: Date
     },
     {
         timestamps: true,

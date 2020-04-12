@@ -46,12 +46,23 @@ module.exports = class UserController {
                     delete object.password;
                     delete object.isVerified;
                     delete object.createdAt;
-                    delete object.updatedAt;
                     users.push(object)
                 }
             });
         });
 
         return Helper.main.response200(res, users, 'recently contacted users')
+    }
+
+    static userStatus(req, res) {
+        User.findOne({_id: req.user.id})
+            .then(user => {
+                let temp = {};
+                Object.assign(temp, user);
+                temp.id = temp._id;
+                delete temp._id;
+                delete temp.password;
+                return Helper.main.response200(res, temp, 'user status');
+            });
     }
 };

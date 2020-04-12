@@ -10,8 +10,8 @@ const JWT = require("jsonwebtoken");
 
 class UserAuthFormat {
     constructor(user) {
-        this.name = user.name,
-        this.email = user.email
+        this.name = user.name;
+        this.email = user.email;
     }
 }
 

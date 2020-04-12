@@ -4,6 +4,7 @@ const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 
 const Helper = require('../config/helper');
+const Utils = require('../helpers/Utils');
 
 module.exports = class ChatController {
 
@@ -112,6 +113,8 @@ module.exports = class ChatController {
                         $push: {messages: object.messages}
                     }, {new: true}).then(updatedChatRoom => {
                     console.log('updatedChatRoom', updatedChatRoom);
+                    Utils.updateUserStatus(data.senderId, true, new Date(), new Date() );
+                    // UserStatus.findOne({user: mongoose.Types.ObjectId(data.receiverId)})
                 })
             }
         });

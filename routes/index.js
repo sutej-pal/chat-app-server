@@ -14,6 +14,8 @@ router.post('/save-chat', ChatController.storeMessages);
 router.post('/chat-history-1', ChatController.chatHistory);
 router.get('/recent-users', AuthMiddleware, UserController.recentlyContactedUsers);
 
+router.get('/user-status', AuthMiddleware, UserController.userStatus);
+
 //chat routes
 
 router.post('/chat-history', AuthMiddleware, ChatController.history);
