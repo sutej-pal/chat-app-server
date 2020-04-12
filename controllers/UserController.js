@@ -73,10 +73,21 @@ module.exports = class UserController {
             });
     }
 
-    static setUserOffline(socketId) {
-        User.findOneAndUpdate({socketId}, {isActive: false}, {new: true})
-            .then(user => {
-                // console.log('user', user);
-            });
+    static async setUserOffline(socketId) {
+        return User.findOneAndUpdate({socketId}, {isActive: false}, {new: true});
+    }
+
+    static getContactedUsers (userId) {
+        let contactedUsers = [];
+       return ChatRoom1.find({participants: {$in : [mongoose.Types.ObjectId(userId)]}}).populate('participants user').lean()
+            .then(chatRooms => {
+                console.log('chatRooms', chatRooms);
+                chatRooms.forEach(chatRoom => {
+                    chatRoom.participants.forEach(user => {
+                        contactedUsers.push(user._id);
+                    });
+                });
+                return _.compact(_.uniq(contactedUsers))
+            })
     }
 };
