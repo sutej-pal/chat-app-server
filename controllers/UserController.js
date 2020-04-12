@@ -65,4 +65,18 @@ module.exports = class UserController {
                 return Helper.main.response200(res, temp, 'user status');
             });
     }
+
+    static setUserOnline(userId, socketId) {
+        User.findOneAndUpdate({_id: userId}, {isActive: true, socketId}, {new: true})
+            .then(user => {
+                // console.log('user', user);
+            });
+    }
+
+    static setUserOffline(socketId) {
+        User.findOneAndUpdate({socketId}, {isActive: false}, {new: true})
+            .then(user => {
+                // console.log('user', user);
+            });
+    }
 };

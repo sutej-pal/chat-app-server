@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema(
         coverImage: String,
         bio: String,
         isActive: Boolean,
-        lastContacted: Date
+        lastContacted: Date,
+        socketId: String
     },
     {
         timestamps: true,

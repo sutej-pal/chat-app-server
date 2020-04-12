@@ -113,7 +113,7 @@ module.exports = class ChatController {
                         $push: {messages: object.messages}
                     }, {new: true}).then(updatedChatRoom => {
                     console.log('updatedChatRoom', updatedChatRoom);
-                    Utils.updateUserStatus(data.senderId, true, new Date(), new Date() );
+                    // Utils.updateUserStatus(data.senderId, true, new Date(), new Date() );
                     // UserStatus.findOne({user: mongoose.Types.ObjectId(data.receiverId)})
                 })
             }
