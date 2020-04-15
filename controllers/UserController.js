@@ -130,7 +130,7 @@ module.exports = class UserController {
         delete update.username;
         delete update._id;
         delete update.name;
-        User.findOneAndUpdate({_id: req.user.id}, update, {new: true}).lean().then(user => {
+        User.findOneAndUpdate({_id: req.body.id}, update, {new: true}).lean().then(user => {
             user.id = user._id;
             delete user._id;
             delete user.otp;
