@@ -20,6 +20,12 @@ router.get('/user-status', AuthMiddleware, UserController.userStatus);
 
 router.post('/chat-history', AuthMiddleware, ChatController.history);
 
+
+router.post('/user-profile', AuthMiddleware, UserController.getUserProfile);
+router.post('/update-user-profile', AuthMiddleware, UserController.updateUserProfile);
+router.post('/update-profile-image', AuthMiddleware, UserController.updateProfileImage);
+router.post('/update-cover-image', AuthMiddleware, UserController.editCoverImage);
+
 router.post('/', (req, res, next) => {
   res.send({ title: 'Express' });
 });

@@ -3,6 +3,9 @@ const User = require('../models/user');
 const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 const _ = require('underscore');
+const storage = require('../config/storage');
+const Utils = require('../utils/utils');
+const fs = require('fs');
 
 module.exports = class UserController {
     static async getAll(req, res) {
@@ -12,6 +15,12 @@ module.exports = class UserController {
             let response = await User.find();
             response.forEach(user => {
                 if (user.name !== activeUser.name) {
+                    if (!user.profileImage) {
+                        user.profileImage = storage.defaultUserProfileImage
+                    }
+                    if (!user.coverImage) {
+                        user.coverImage = storage.defaultUserCoverImage
+                    }
                     users.push(user.toObject());
                 }
             });
@@ -46,6 +55,12 @@ module.exports = class UserController {
                     delete object.password;
                     delete object.isVerified;
                     delete object.createdAt;
+                    if (!object.profileImage) {
+                        object.profileImage = storage.defaultUserProfileImage
+                    }
+                    if (!object.coverImage) {
+                        object.coverImage = storage.defaultUserCoverImage
+                    }
                     users.push(object)
                 }
             });
@@ -89,5 +104,81 @@ module.exports = class UserController {
                 });
                 return _.compact(_.uniq(contactedUsers))
             })
+    }
+
+    static getUserProfile(req, res) {
+        User.findOne({_id: req.body.userId})
+            .select('name email profileImage bio coverImage').lean()
+            .then(user => {
+            if (!user.profileImage) {
+                user.profileImage = storage.defaultUserProfileImage
+            }
+            if (!user.coverImage) {
+                user.coverImage = storage.defaultUserCoverImage
+            }
+            user = Utils.replaceMongooseId(user);
+            return Helper.main.response200(res, user, 'user profile');
+        }).catch(err => {
+            console.log('err', err);
+            return Helper.main.response500(res, 'failed', 'user profile');
+        })
+    }
+
+    static updateUserProfile(req, res) {
+        let update = req.body;
+        delete update.email;
+        delete update.username;
+        delete update._id;
+        delete update.name;
+        User.findOneAndUpdate({_id: req.user.id}, update, {new: true}).lean().then(user => {
+            user.id = user._id;
+            delete user._id;
+            delete user.otp;
+            delete user.isVerified;
+            delete user.sockerId;
+            return Helper.main.response200(res, user, 'user profile updated');
+
+        }).catch(err => {
+            console.log('err', err);
+            return Helper.main.response500(res, 'failed', 'user profile update failed');
+        })
+    }
+
+    static updateProfileImage(req, res) {
+        if (!req.files || !req.files.file) {
+            let message = 'image not found in request';
+            return Helper.main.response400(res, message, 'profile image update failed');
+        }
+        let fileObject = Utils.getFileObject(req.files.file, 'profileImageSD');
+        fs.writeFile(fileObject.filePath, fileObject.file, function (err) {
+            if (err) return console.log(err);
+            User.findOneAndUpdate({_id: req.user.id},
+                {profileImage: storage.profileImageSD + fileObject.fileName},
+                {new: true}).then(user => {
+                return Helper.main.response200(res, {}, 'profile image updated');
+            }).catch(err => {
+                console.log('err', err);
+                return Helper.main.response500(res, 'failed', 'profile image update failed');
+            })
+        });
+    }
+
+    static editCoverImage(req, res) {
+        if (!req.files || !req.files.file) {
+            let message = 'image not found in request';
+            return Helper.main.response400(res, message, 'cover image update failed');
+        }
+        let fileObject = Utils.getFileObject(req.files.file, 'profileCoverImageSD');
+        fs.writeFile(fileObject.filePath, fileObject.file, function (err) {
+            if (err) return console.log(err);
+            User.findOneAndUpdate({_id: req.user.id},
+                {coverImage: storage.profileCoverImageSD + fileObject.fileName},
+                {new: true}).then(user => {
+                return Helper.main.response200(res, {}, 'cover image updated');
+            }).catch(err => {
+                console.log('err', err);
+                return Helper.main.response500(res, 'failed', 'cover image update failed');
+            })
+        });
     }
 };

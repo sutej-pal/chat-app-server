@@ -6,5 +6,6 @@ module.exports = {
 
     // default-images
 
-    defaultUserImage: 'storage/users/sample-user.png',
+    defaultUserProfileImage: 'storage/users/default-user-image.png',
+    defaultUserCoverImage: 'storage/users/default-user-cover-image.jpg',
 };

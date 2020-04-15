@@ -4,7 +4,7 @@ const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 
 const Helper = require('../config/helper');
-const Utils = require('../helpers/Utils');
+const Utils = require('../utils/utils');
 
 module.exports = class ChatController {
 
