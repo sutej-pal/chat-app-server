@@ -1,5 +1,6 @@
 const LoginValidator = require("../validators/app/login_validator");
 const RegisterValidator = require("../validators/register_validator");
+const UserConstructor = require('../response_constructors/userConstructor')
 
 const User = require("../models/user");
 const ApiToken = require("../models/apitoken");
@@ -98,7 +99,7 @@ module.exports = class AuthController {
 
                                     return res.json({
                                         message: "Login Successful!",
-                                        data: Object.assign(apiToken.toObject(), user.toObject())
+                                        data: Object.assign(apiToken.toObject(), new UserConstructor(user))
                                     });
                                 })
                                 .catch(err => {
