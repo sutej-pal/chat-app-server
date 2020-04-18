@@ -38,7 +38,6 @@ module.exports = class ChatController {
             receiverId: data.receiverId,
             message: data.message
         };
-        console.log('object', object);
         try {
             const response = await Chat.create(object);
             return response._doc
@@ -84,7 +83,8 @@ module.exports = class ChatController {
                 receiverId: mongoose.Types.ObjectId(data.receiverId)
             }
         };
-        ChatRoom1.find({
+
+        return ChatRoom1.find({
             participants: {
                 $all:
                     [
@@ -93,13 +93,13 @@ module.exports = class ChatController {
                     ]
             }
         }).lean().then(chatRoom => {
-            console.log('chatRoom', chatRoom);
             if (chatRoom.length === 0) {
-                ChatRoom1.create(object).then(newChatRoom => {
-                    console.log('newChatRoom', newChatRoom);
+                return ChatRoom1.create(object).then(newChatRoom => {
+                    const messagesArray = newChatRoom.messages;
+                    return messagesArray[messagesArray.length - 1]
                 })
             } else {
-                ChatRoom1.findOneAndUpdate(
+                return ChatRoom1.findOneAndUpdate(
                     {
                         participants: {
                             $all:
@@ -111,10 +111,9 @@ module.exports = class ChatController {
                     },
                     {
                         $push: {messages: object.messages}
-                    }, {new: true}).then(updatedChatRoom => {
-                    console.log('updatedChatRoom', updatedChatRoom);
-                    // Utils.updateUserStatus(data.senderId, true, new Date(), new Date() );
-                    // UserStatus.findOne({user: mongoose.Types.ObjectId(data.receiverId)})
+                    }, {new: true}).then(async updatedChatRoom => {
+                    const messagesArray = updatedChatRoom.messages;
+                    return messagesArray[messagesArray.length - 1];
                 })
             }
         });

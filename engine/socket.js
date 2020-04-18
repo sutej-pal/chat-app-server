@@ -11,8 +11,8 @@ module.exports = function (server) {
             io.sockets.emit('online-user', user);
         });
         socket.on('SEND_MESSAGE', data => {
-            ChatController.storeMessages(data).then(() => {
-                io.emit('MESSAGE', data)
+            ChatController.storeMessages(data).then((message) => {
+                io.emit('MESSAGE', message)
             })
         });
         socket.on('disconnect', function () {

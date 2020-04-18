@@ -45,7 +45,6 @@ module.exports = class UserController {
         _.each(chatRooms, chatRoom => {
             _.each(chatRoom.participants, user => {
                 if (user._id.toString() === activeUser.id.toString()) {
-                    console.log(user._id, activeUser.id);
                 } else {
                     let object = Object.assign({}, user);
                     object.id = object._id;
@@ -96,7 +95,6 @@ module.exports = class UserController {
         let contactedUsers = [];
        return ChatRoom1.find({participants: {$in : [mongoose.Types.ObjectId(userId)]}}).populate('participants user').lean()
             .then(chatRooms => {
-                console.log('chatRooms', chatRooms);
                 chatRooms.forEach(chatRoom => {
                     chatRoom.participants.forEach(user => {
                         contactedUsers.push(user._id);

@@ -18,7 +18,6 @@ module.exports = class Utils {
                 lastContacted
             },
             {upsert: true, new: true});
-        console.log('hi', status)
     }
 
     static replaceMongooseId(object) {
@@ -50,5 +49,9 @@ module.exports = class Utils {
         } catch (e) {
             throw e
         }
+    }
+
+    static getUser(userId) {
+        return User.findOne({_id: userId})
     }
 };
