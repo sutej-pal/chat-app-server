@@ -2,8 +2,11 @@ const Chat = require('../models/chat');
 const ChatRoom = require('../models/chat_room');
 const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const uuidv4 = require('uuid/v4');
 
 const Helper = require('../config/helper');
+const Storage = require('../config/storage');
 const Utils = require('../utils/utils');
 
 module.exports = class ChatController {
@@ -84,6 +87,21 @@ module.exports = class ChatController {
             }
         };
 
+        if (data.attachments && data.attachments.file) {
+            let arr = data.attachments.fileName.split('.');
+            let fileExtension = arr[arr.length - 1];
+            let fileName = uuidv4() + '.' + fileExtension;
+            let filePath = Storage.base + Storage.media + fileName;
+            try {
+                let file = await fs.writeFileSync(filePath, data.attachments.file);
+                object.messages.attachments = {
+                    fileType: 'image',
+                    file: Storage.media + fileName
+                }
+            } catch (e) {
+                return e
+            }
+        }
         return ChatRoom1.find({
             participants: {
                 $all:
@@ -92,7 +110,7 @@ module.exports = class ChatController {
                         mongoose.Types.ObjectId(data.receiverId)
                     ]
             }
-        }).lean().then(chatRoom => {
+        }).lean().then(async chatRoom => {
             if (chatRoom.length === 0) {
                 return ChatRoom1.create(object).then(newChatRoom => {
                     const messagesArray = newChatRoom.messages;

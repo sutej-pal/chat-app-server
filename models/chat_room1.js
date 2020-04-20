@@ -6,7 +6,8 @@ const messageSchema = new mongoose.Schema(
             type: String
         },
         attachments: {
-            required: false
+            fileType: String,
+            file: String
         },
         senderId: {
             type: mongoose.Types.ObjectId,
