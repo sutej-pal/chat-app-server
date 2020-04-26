@@ -3,7 +3,7 @@ const ChatRoom = require('../models/chat_room');
 const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 const Helper = require('../config/helper');
 const Storage = require('../config/storage');
