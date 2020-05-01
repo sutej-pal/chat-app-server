@@ -131,7 +131,14 @@ module.exports = class ChatController {
                         $push: {messages: object.messages}
                     }, {new: true}).then(async updatedChatRoom => {
                     const messagesArray = updatedChatRoom.messages;
-                    return messagesArray[messagesArray.length - 1];
+                    const message = messagesArray[messagesArray.length - 1];
+                    let receiver = await Utils.getUser(message.receiverId);
+                    let sender = await Utils.getUser(message.senderId);
+                    return {
+                        message,
+                        receiverSocketId: receiver.socketId,
+                        senderSocketId: sender.socketId
+                    }
                 })
             }
         });

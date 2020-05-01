@@ -10,9 +10,11 @@ module.exports = function (server) {
             UserController.setUserOnline(user.id, socket.id);
             io.sockets.emit('online-user', user);
         });
-        socket.on('SEND_MESSAGE', data => {
-            ChatController.storeMessages(data).then((message) => {
-                io.emit('MESSAGE', message)
+        socket.on('send-message', data => {
+            console.log('send-message', socket.id);
+            ChatController.storeMessages(data).then((data) => {
+                io.to(data.receiverSocketId).emit('message', data.message);
+                io.to(data.senderSocketId).emit('message', data.message);
             })
         });
         socket.on('disconnect', function () {
