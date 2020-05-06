@@ -3,11 +3,12 @@ const ChatRoom = require('../models/chat_room');
 const ChatRoom1 = require('../models/chat_room1');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 const Helper = require('../config/helper');
 const Storage = require('../config/storage');
 const Utils = require('../utils/utils');
+const MediaController = require("./MediaController");
 
 module.exports = class ChatController {
 
@@ -51,12 +52,6 @@ module.exports = class ChatController {
     }
 
     static async history(req, response) {
-        // let object = {
-        //     participants: [
-        //         mongoose.Types.ObjectId(req.body.senderId),
-        //         mongoose.Types.ObjectId(req.body.receiverId)
-        //     ]
-        // };
         let senderId = mongoose.Types.ObjectId(req.body.senderId);
         let receiverId = mongoose.Types.ObjectId(req.body.receiverId);
 
@@ -93,12 +88,22 @@ module.exports = class ChatController {
             let fileName = uuidv4() + '.' + fileExtension;
             let filePath = Storage.base + Storage.media + fileName;
             try {
-                let file = await fs.writeFileSync(filePath, data.attachments.file);
+                let thumb = '';
+                await fs.writeFileSync(filePath, data.attachments.file);
+                if (data.attachments.type === 'video') {
+                    thumb = await MediaController.generateThumbFromVideo(Storage.media + fileName);
+                    console.log('thumb', thumb);
+                }
+                if (data.attachments.type === 'image') {
+                    thumb = Storage.media + fileName
+                }
                 object.messages.attachments = {
-                    fileType: 'image',
-                    file: Storage.media + fileName
+                    fileType: data.attachments.type,
+                    file: Storage.media + fileName,
+                    thumb: thumb
                 }
             } catch (e) {
+                console.log(e);
                 return e
             }
         }
@@ -112,9 +117,15 @@ module.exports = class ChatController {
             }
         }).lean().then(async chatRoom => {
             if (chatRoom.length === 0) {
-                return ChatRoom1.create(object).then(newChatRoom => {
-                    const messagesArray = newChatRoom.messages;
-                    return messagesArray[messagesArray.length - 1]
+                return ChatRoom1.create(object).then(async newChatRoom => {
+                    const message = newChatRoom.messages[0]
+                    let receiver = await Utils.getUser(message.receiverId);
+                    let sender = await Utils.getUser(message.senderId);
+                    return {
+                        message,
+                        receiverSocketId: receiver.socketId,
+                        senderSocketId: sender.socketId
+                    }
                 })
             } else {
                 return ChatRoom1.findOneAndUpdate(
@@ -131,14 +142,21 @@ module.exports = class ChatController {
                         $push: {messages: object.messages}
                     }, {new: true}).then(async updatedChatRoom => {
                     const messagesArray = updatedChatRoom.messages;
-                    return messagesArray[messagesArray.length - 1];
+                    const message = messagesArray[messagesArray.length - 1];
+                    let receiver = await Utils.getUser(message.receiverId);
+                    let sender = await Utils.getUser(message.senderId);
+                    return {
+                        message,
+                        receiverSocketId: receiver.socketId,
+                        senderSocketId: sender.socketId
+                    }
                 })
             }
         });
     }
 
     static async chatHistory(req, res) {
-        let chatRoom = await ChatRoom1.find(
+        let chatRoom = await ChatRoom1.findOne(
             {
                 participants: {
                     $all:
@@ -148,8 +166,8 @@ module.exports = class ChatController {
                         ]
                 }
             });
-        if (chatRoom.length > 0 && chatRoom[0].messages) {
-            return Helper.main.response200(res, chatRoom[0].messages, 'chat history');
+        if (chatRoom) {
+            return Helper.main.response200(res, chatRoom, 'chat history');
         } else {
             return Helper.main.response200(res, [], 'chat history');
         }
