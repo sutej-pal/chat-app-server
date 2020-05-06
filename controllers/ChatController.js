@@ -95,7 +95,10 @@ module.exports = class ChatController {
                     console.log('thumb', thumb);
                 }
                 if (data.attachments.type === 'image') {
-                    thumb = Storage.media + fileName
+                    const buffer = await MediaController.generateThumbFromImage(Storage.media + fileName);
+                    let temp = Storage.media + uuidv4() + '.' + fileExtension;
+                    await fs.writeFileSync(Storage.base + temp, buffer);
+                    thumb = temp
                 }
                 object.messages.attachments = {
                     fileType: data.attachments.type,

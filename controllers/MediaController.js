@@ -4,6 +4,7 @@ const _ = require('underscore');
 const ffmpeg = require('ffmpeg');
 const Storage = require('../config/storage');
 const { v4: uuidv4 } = require('uuid');
+const imageThumbnail = require('image-thumbnail');
 
 class MediaController {
     static async getMedia(req, res) {
@@ -48,6 +49,14 @@ class MediaController {
             }
         });
     }
-}
+
+    static async generateThumbFromImage (filePath) {
+        try {
+            return imageThumbnail(filePath);
+        } catch (err) {
+            return ''
+        }
+    }
+ }
 
 module.exports = MediaController;
