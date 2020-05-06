@@ -31,6 +31,16 @@ module.exports = class UserController {
         }
     }
 
+    static async getUser (req, res) {
+        try {
+            let user = await User.findOne({_id: req.params.userId});
+            let resp = user.toObject();
+            return Helper.main.response200(res, resp, 'user');
+        } catch (e) {
+
+        }
+    }
+
     static async recentlyContactedUsers(req, res) {
         let activeUser = req.user;
         let chatRooms = await ChatRoom1

@@ -11,6 +11,7 @@ const MediaController = require('../controllers/MediaController');
 router.post('/sign-up', AuthController.signUp);
 router.post('/login', AuthController.login);
 router.get('/all-users', AuthMiddleware, UserController.getAll);
+router.get('/user/:userId', AuthMiddleware, UserController.getUser);
 router.post('/save-chat', ChatController.storeMessages);
 router.post('/chat-history-1', ChatController.chatHistory);
 router.get('/recent-users', AuthMiddleware, UserController.recentlyContactedUsers);
