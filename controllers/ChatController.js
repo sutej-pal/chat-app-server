@@ -1,9 +1,8 @@
 const Chat = require('../models/chat');
-const ChatRoom = require('../models/chat_room');
-const ChatRoom1 = require('../models/chat_room1');
+const ChatRoom = require('../models/chat_room1');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 
 const Helper = require('../config/helper');
 const Storage = require('../config/storage');
@@ -78,7 +77,8 @@ module.exports = class ChatController {
             messages: {
                 message: data.message,
                 senderId: mongoose.Types.ObjectId(data.senderId),
-                receiverId: mongoose.Types.ObjectId(data.receiverId)
+                receiverId: mongoose.Types.ObjectId(data.receiverId),
+                seen: false
             }
         };
 
@@ -110,7 +110,7 @@ module.exports = class ChatController {
                 return e
             }
         }
-        return ChatRoom1.find({
+        return ChatRoom.find({
             participants: {
                 $all:
                     [
@@ -120,7 +120,7 @@ module.exports = class ChatController {
             }
         }).lean().then(async chatRoom => {
             if (chatRoom.length === 0) {
-                return ChatRoom1.create(object).then(async newChatRoom => {
+                return ChatRoom.create(object).then(async newChatRoom => {
                     const message = newChatRoom.messages[0]
                     let receiver = await Utils.getUser(message.receiverId);
                     let sender = await Utils.getUser(message.senderId);
@@ -131,7 +131,7 @@ module.exports = class ChatController {
                     }
                 })
             } else {
-                return ChatRoom1.findOneAndUpdate(
+                return ChatRoom.findOneAndUpdate(
                     {
                         participants: {
                             $all:
@@ -159,7 +159,7 @@ module.exports = class ChatController {
     }
 
     static async chatHistory(req, res) {
-        let chatRoom = await ChatRoom1.findOne(
+        let chatRoom = await ChatRoom.findOne(
             {
                 participants: {
                     $all:
@@ -173,6 +173,26 @@ module.exports = class ChatController {
             return Helper.main.response200(res, chatRoom, 'chat history');
         } else {
             return Helper.main.response200(res, [], 'chat history');
+        }
+
+    }
+
+    static async updateMessageReadStatus(data) {
+        await ChatRoom.updateOne(
+            {_id: data.chatRoomId},
+            {$set: {"messages.$[message].seen": true}},
+            {
+                multi: true,
+                arrayFilters: [{"message.seen": false}]
+            }
+        );
+        const receiver = await Utils.getUser(data.message.receiverId);
+        const sender = await Utils.getUser(data.message.senderId);
+        return {
+            receiverSocketId: receiver.socketId,
+            receiverId: receiver._id,
+            senderSocketId: sender.socketId,
+            senderId: sender._id
         }
 
     }

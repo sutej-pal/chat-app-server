@@ -17,6 +17,14 @@ module.exports = function (server) {
                 io.to(data.senderSocketId).emit('message', data.message);
             })
         });
+        socket.on('messages-read', data => {
+            ChatController.updateMessageReadStatus(data)
+                .then(res => {
+                    console.log(res);
+                    io.to(res.receiverSocketId).emit('message-seen', res);
+                    io.to(res.senderSocketId).emit('message-seen', res);
+                })
+        })
         socket.on('disconnect', function () {
             UserController.setUserOffline(socket.id).then(disconnectedUser => {
                 if (disconnectedUser) {
